@@ -1,17 +1,19 @@
 from flask import render_template, flash, redirect, url_for
 from flask_login import current_user, login_user, logout_user, login_required
-from app.forms import LoginForm
-from app import app, db
+from app.forms import LoginForm, RegistrationForm,  UploadImageForm
+from app import app, db, ImageCaptioning
 from app.models import User
 from flask import request
 from werkzeug.urls import url_parse
-from app.forms import RegistrationForm
+from werkzeug.utils import secure_filename
+import os
 
 @app.route('/')
 @app.route('/index')
 @login_required
 def index():
-    return render_template('index.html',title='Home')
+    form = UploadImageForm()
+    return render_template('index.html',title='Home',form=form)
 
 @app.route('/login', methods = ['GET','POST'])
 def login():
@@ -50,3 +52,28 @@ def register():
 def logout():
     logout_user()
     return redirect(url_for('index'))
+
+@app.route('/uploadimage', methods=['GET','POST'])
+def upload_image():
+    if request.method == 'POST':
+        print(request.files)
+        if 'fileupload' not in request.files:
+            flash('No file Part. Please upload the file')
+            return redirect(url_parse('index'))
+
+        #file is there
+        file = request.files['fileupload']
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(url_parse('index'))
+        if file:
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            caption =ImageCaptioning.predict_user_images(filename)
+            flash(caption)
+            print(caption)
+            return redirect(url_parse('index'))
+        else:
+            flash('Invalid file type. Allowed file types are: png, jpg, jpeg, gif')
+            return redirect(url_parse('index'))
+

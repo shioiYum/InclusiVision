@@ -1,6 +1,49 @@
-{%extends "base.html"%}
+{% extends "base.html" %}
 {% block content %}
-<h1>Hi, {{ current_user.username}}!</h1>
+<h1>Hi, {{ current_user.username }}!</h1>
 <div>
+    <!-- Display flashed messages -->
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul class="flash-messages">
+        {% for message in messages %}
+        <span style="color: red;">[{{ message }}]</span>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+
+    <form action="/uploadimage" method="post" enctype="multipart/form-data" novalidate>
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.fileupload(class="form-control-file", id="fileInput") }}
+            <br>
+            <img id="imagePreview" src="#" alt="Selected Image"
+                style="display: none; max-width: 300px; max-height: 300px;">
+        </p>
+        <p>{{ form.submit(class="btn btn-primary") }}</p>
+    </form>
 </div>
+
+<script>
+    function previewImage() {
+        var fileInput = document.getElementById('fileInput');
+        var imagePreview = document.getElementById('imagePreview');
+
+        fileInput.addEventListener('change', function () {
+            var file = fileInput.files[0];
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+            }
+
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // Call the function to set up the image preview when the page loads
+    window.onload = previewImage;
+</script>
 {% endblock %}
