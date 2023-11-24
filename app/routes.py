@@ -1,7 +1,8 @@
 from flask import render_template, flash, redirect, url_for
 from flask_login import current_user, login_user, logout_user, login_required
-from app.forms import LoginForm, RegistrationForm,  UploadImageForm
+from app.forms import LoginForm, RegistrationForm,  UploadImageForm, UploadVideoForm
 from app import app, db, ImageCaptioning
+from app.Video_Captioning.predict_realtime import predict_video
 from app.models import User
 from flask import request
 from werkzeug.urls import url_parse
@@ -68,12 +69,40 @@ def upload_image():
             return redirect(url_parse('index'))
         if file:
             filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            file.save(os.path.join(app.config['UPLOAD_FOLDER_IMAGE'], filename))
             caption =ImageCaptioning.predict_user_images(filename)
-            flash(caption)
             print(caption)
-            return redirect(url_parse('index'))
+            caption = ' '.join(caption.split()[1:-1])
+            return render_template('result.html',message=caption)
         else:
             flash('Invalid file type. Allowed file types are: png, jpg, jpeg, gif')
             return redirect(url_parse('index'))
+        
+@app.route('/uploadvideo',methods=['GET', 'POST'])
+def upload_video():
+        if request.method == 'POST':
+            print(request.files)
+            if 'fileupload' not in request.files:
+                flash('No file Part. Please upload the file')
+                return redirect(url_parse('index'))
+
+            #file is there
+            file = request.files['fileupload']
+            if file.filename == '':
+                flash('No selected file')
+                return redirect(url_parse('uploadvideo'))
+            if file:
+                filename = secure_filename(file.filename)
+                file_path = os.path.join(app.config['UPLOAD_FOLDER_VIDEO'], filename)
+                file.save(file_path)
+                caption = predict_video()
+                print(caption)
+                os.remove(file_path)
+                return render_template('result.html',message=caption)
+            else:
+                flash('Invalid file type. Allowed file types are: png, jpg, jpeg, gif')
+                return redirect(url_parse('uploadvideo'))
+        form = UploadVideoForm()
+        return render_template('video.html',title='Video',form=form)
+    
 

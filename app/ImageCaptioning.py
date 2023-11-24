@@ -46,7 +46,7 @@ def predict_caption(model, image, tokenizer, max_length):
 def predict_user_images(image_path):
     
     # load image
-    image_path = os.path.join(app.config['UPLOAD_FOLDER'], image_path)
+    image_path = os.path.join(app.config['UPLOAD_FOLDER_IMAGE'], image_path)
     image = load_img(image_path, target_size=(224, 224))
     # convert image pixels to numpy array
     image = img_to_array(image)

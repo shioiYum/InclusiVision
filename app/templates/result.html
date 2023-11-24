@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<div>
+    <!-- Display flashed messages -->
+    {% if message %}
+    <span style="color: red;">[{{ message }}]</span>
+    <button onclick="speakMessage('{{ message }}')">Play</button>
+    {% endif %}
+</div>
+
+<script>
+    function delayPlayMessage(message) {
+        setTimeout(function () {
+            speakMessage(message);
+        }, 2000); // Delay of 5 seconds (5000 milliseconds)
+    }
+
+    function speakMessage(message) {
+        var msg = new SpeechSynthesisUtterance();
+        msg.text = message;
+
+        var voices = window.speechSynthesis.getVoices();
+        var preferredVoice = voices.find(voice => voice.name === 'Microsoft Zira Desktop - English (United States)');
+        msg.voice = preferredVoice;
+
+        window.speechSynthesis.speak(msg);
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var messageToSpeak = "{{ message }}"; // Get the message from Flask
+        delayPlayMessage(messageToSpeak);
+    });
+</script>
+{% endblock %}

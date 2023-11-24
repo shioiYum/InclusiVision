@@ -1,4 +1,5 @@
-from app import app, db
+from app import app, db, ImageCaptioning
+from app.Video_Captioning import *
 from app.models import User
 
 @app.shell_context_processor

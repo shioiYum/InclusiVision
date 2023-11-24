@@ -3,6 +3,7 @@ from wtforms import StringField, PasswordField, BooleanField, SubmitField, FileF
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
 from app.models import User
 
+
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
@@ -31,3 +32,7 @@ class RegistrationForm(FlaskForm):
 class UploadImageForm(FlaskForm):
     fileupload = FileField('Choose the File', validators=[DataRequired()])
     submit = SubmitField('Upload')
+
+class UploadVideoForm(FlaskForm):
+        fileupload = FileField('Choose the File', validators=[DataRequired()])
+        submit = SubmitField('Upload')

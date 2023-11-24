@@ -6,20 +6,24 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
     <script src="{{url_for('static',filename='js/script.js')}}"></script>
     {% if title %}
-    <title> {{ title }} - By Blog </title>
+    <title> {{ title }} </title>
     {% else %}
     <title> Welcome to Inclusivision! </title>
     {% endif %}
 </head>
 
 <body>
-    <div>Inclusivion:
-        <a href="{{ url_for('index') }}">Home</a>
-        {% if current_user.is_anonymous %}
-        <a href="{{ url_for('login') }}">Login</a>
-        {% else %}
-        <a href="{{url_for('logout')}}">Logout</a>
-        {% endif %}
+    <div class="header">
+        <a href="#default" class="logo">Inclusivion:</a>
+        <div class="header-right">
+            <a href="{{ url_for('index') }}">Home</a>
+            <a href="{{url_for('upload_video')}}">Video</a>
+            {% if current_user.is_anonymous %}
+            <a href="{{ url_for('login') }}">Login</a>
+            {% else %}
+            <a href="{{url_for('logout')}}">Logout</a>
+            {% endif %}
+        </div>
     </div>
     <hr>
     {% block content %} {% endblock %}

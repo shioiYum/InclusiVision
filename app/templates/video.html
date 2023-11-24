@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Hi, {{ current_user.username }}!</h1>
+<div>
+    <!-- Display flashed messages -->
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul class="flash-messages">
+        {% for message in messages %}
+        <span style="color: red;">[{{ message }}]</span>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+
+    <form action="" method="post" enctype="multipart/form-data" novalidate>
+        {{ form.hidden_tag() }}
+        <p>
+            <input type="file" name="fileupload" class="form-control-file" id="fileInput" accept="video/*"
+                onchange="previewVideo(event)">
+            <br>
+            <video id="videoPreview" controls style="max-width: 300px; max-height: 300px; display: none;">
+                Your browser does not support the video tag.
+            </video>
+        </p>
+        <p>{{ form.submit(class="btn btn-primary") }}</p>
+    </form>
+</div>
+
+<script>
+    function previewVideo(event) {
+        var videoPreview = document.getElementById('videoPreview');
+        var fileInput = event.target.files[0];
+        var fileURL = URL.createObjectURL(fileInput);
+
+        videoPreview.src = fileURL;
+        videoPreview.style.display = 'block';
+    }
+</script>
+{% endblock %}
