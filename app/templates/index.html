@@ -1,34 +1,46 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Hi, {{ current_user.username }}!</h1>
-<div>
+<div class="container mt-5">
     <!-- Display flashed messages -->
     {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    <ul class="flash-messages">
-        {% for message in messages %}
-        <span style="color: red;">[{{ message }}]</span>
-        {% endfor %}
-    </ul>
-    {% endif %}
+        {% if messages %}
+            <ul class="list-unstyled">
+                {% for message in messages %}
+                    <li><span class="text-danger">[{{ message }}]</span></li>
+                {% endfor %}
+            </ul>
+        {% endif %}
     {% endwith %}
-
-    <form action="/uploadimage" method="post" enctype="multipart/form-data" novalidate>
+    
+    <form action="/uploadimage" method="post" enctype="multipart/form-data" novalidate id="imageForm">
         {{ form.hidden_tag() }}
-        <p>
+        <div class="mb-3 text-center">
             {{ form.fileupload(class="form-control-file", id="fileInput") }}
-            <br>
-            <img id="imagePreview" src="#" alt="Selected Image"
-                style="display: none; max-width: 300px; max-height: 300px;">
-        </p>
-        <p>{{ form.submit(class="btn btn-primary") }}</p>
+        </div>
+        <div class="mb-3 text-center">
+            <div class="d-flex justify-content-center">
+                <img id="imagePreview" src="#" alt="Selected Image" style="max-width: 300px; max-height: 300px; display: none;" class="img-fluid">
+            </div>
+        </div>
+        <div class="mb-3 text-center">
+            {{ form.submit(class="btn btn-primary") }}
+        </div>
     </form>
+
+    <!-- Field to display response text -->
+    <div class="mb-3 text-center">
+        <p id="responseText" class="lead"></p>
+        <button id="speechToTextBtn" class="btn btn-secondary">Speech to Text</button>
+    </div>
 </div>
 
 <script>
     function previewImage() {
         var fileInput = document.getElementById('fileInput');
         var imagePreview = document.getElementById('imagePreview');
+        var form = document.getElementById('imageForm');
+        var responseText = document.getElementById('responseText');
+        var speechToTextBtn = document.getElementById('speechToTextBtn');
 
         fileInput.addEventListener('change', function () {
             var file = fileInput.files[0];
@@ -40,6 +52,30 @@
             }
 
             reader.readAsDataURL(file);
+        });
+
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+            var formData = new FormData(form);
+
+            fetch('/uploadimage', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display response text in the designated field
+                responseText.style.display = 'block';
+                responseText.textContent = data.caption; // Replace 'text_field' with the actual field name in the JSON response
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        // Speech-to-text functionality (requires proper setup and integration with a speech recognition API)
+        speechToTextBtn.addEventListener('click', function () {
+        var msg = new SpeechSynthesisUtterance();
+        msg.text = responseText.textContent;
+        window.speechSynthesis.speak(msg);
         });
     }
 

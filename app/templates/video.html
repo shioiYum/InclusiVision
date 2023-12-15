@@ -1,40 +1,115 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Hi, {{ current_user.username }}!</h1>
-<div>
+<div class="container mt-5">
     <!-- Display flashed messages -->
     {% with messages = get_flashed_messages() %}
     {% if messages %}
-    <ul class="flash-messages">
+    <ul class="list-unstyled">
         {% for message in messages %}
-        <span style="color: red;">[{{ message }}]</span>
+        <span class="text-danger">[{{ message }}]</span>
         {% endfor %}
     </ul>
     {% endif %}
     {% endwith %}
 
-    <form action="" method="post" enctype="multipart/form-data" novalidate>
-        {{ form.hidden_tag() }}
-        <p>
-            <input type="file" name="fileupload" class="form-control-file" id="fileInput" accept="video/*"
-                onchange="previewVideo(event)">
-            <br>
-            <video id="videoPreview" controls style="max-width: 300px; max-height: 300px; display: none;">
-                Your browser does not support the video tag.
-            </video>
-        </p>
-        <p>{{ form.submit(class="btn btn-primary") }}</p>
-    </form>
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <form action="/uploadvideo" method="post" enctype="multipart/form-data" novalidate id="videoForm">
+                {{ form.hidden_tag() }}
+                <div class="mb-3">
+                    {{ form.fileupload(class="form-control-file", id="videoInput", accept="video/*") }}
+                </div>
+                <div class="mb-3 text-center">
+                    <div class="d-flex justify-content-center">
+                        <video id="videoPreview" controls style="max-width: 300px; max-height: 300px; display: none;">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div id="processing" style="visibility: hidden;">
+                        <p class="lead">Processing...</p>
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Processing...</span>
+                        </div>
+                    </div>
+                    <button id="uploadBtn" class="btn btn-primary">Upload</button>
+                </div>
+            </form>
+            <!-- Field to display response text -->
+            <div class="mb-3 text-center">
+                <p id="responseText" class="lead"></p>
+                <button id="speechToTextBtn" class="btn btn-secondary">Speech to Text</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
+    function showProcessing(show) {
+        var uploadBtn = document.getElementById('uploadBtn');
+        var processing = document.getElementById('processing');
+
+        if (show) {
+            uploadBtn.style.visibility = 'hidden';
+            processing.style.visibility = 'visible';
+        } else {
+            uploadBtn.style.visibility = 'visible';
+            processing.style.visibility = 'hidden';
+        }
+    }
+
     function previewVideo(event) {
         var videoPreview = document.getElementById('videoPreview');
         var fileInput = event.target.files[0];
-        var fileURL = URL.createObjectURL(fileInput);
+        var form = document.getElementById('videoForm');
+        var responseText = document.getElementById('responseText');
+        var speechToTextBtn = document.getElementById('speechToTextBtn');
 
-        videoPreview.src = fileURL;
-        videoPreview.style.display = 'block';
+        if (fileInput) {
+            var fileURL = URL.createObjectURL(fileInput);
+
+            videoPreview.src = fileURL;
+            videoPreview.style.display = 'block';
+        }
+
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+            var formData = new FormData(form);
+
+            // Display processing message and animation
+            showProcessing(true);
+
+            fetch('/uploadvideo', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Hide processing and display the server response
+                showProcessing(false);
+                responseText.style.display = 'block';
+                responseText.textContent = data.caption; // Replace 'text_field' with the actual field name in the JSON response
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Hide processing and display an error message
+                showProcessing(false);
+                responseText.style.display = 'block';
+                responseText.textContent = 'An error occurred. Please try again.';
+            });
+        });
+
+        // Speech-to-text functionality (requires proper setup and integration with a speech recognition API)
+        speechToTextBtn.addEventListener('click', function () {
+            var msg = new SpeechSynthesisUtterance();
+            msg.text = responseText.textContent;
+            window.speechSynthesis.speak(msg);
+        });
     }
+
+    // Attach the onchange event listener to the file input
+    var inputElement = document.getElementById('videoInput');
+    inputElement.addEventListener('change', previewVideo);
 </script>
 {% endblock %}

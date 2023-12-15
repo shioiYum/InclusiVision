@@ -105,3 +105,37 @@
 
 
  }
+
+ .home {
+     width: 300px;
+     overflow: hidden;
+     margin: auto;
+     margin: 20 0 0 450px;
+     padding: 80px;
+     background: #e3e6e6;
+     border-radius: 15px;
+
+ }
+
+ .btn-primary {
+     width: 300px;
+     height: 35px;
+     border: none;
+     border-radius: 8px;
+     padding-left: 7px;
+     color: rgb(197, 197, 200);
+     background-color: rgb(59, 59, 61);
+
+
+ }
+
+ .video {
+     width: 300px;
+     overflow: hidden;
+     margin: auto;
+     margin: 20 0 0 450px;
+     padding: 80px;
+     background: #e3e6e6;
+     border-radius: 15px;
+
+ }

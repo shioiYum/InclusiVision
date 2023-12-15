@@ -1,4 +1,4 @@
-from flask import render_template, flash, redirect, url_for
+from flask import render_template, flash, redirect, url_for, jsonify
 from flask_login import current_user, login_user, logout_user, login_required
 from app.forms import LoginForm, RegistrationForm,  UploadImageForm, UploadVideoForm
 from app import app, db, ImageCaptioning
@@ -14,7 +14,7 @@ import os
 @login_required
 def index():
     form = UploadImageForm()
-    return render_template('index.html',title='Home',form=form)
+    return render_template('index.html',title='Home',form=form,head_title="Image")
 
 @app.route('/login', methods = ['GET','POST'])
 def login():
@@ -31,7 +31,7 @@ def login():
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_parse('index')
         return redirect(next_page)
-    return render_template('login.html', title='Sign In',form=form)
+    return render_template('login.html', title='Sign In',form=form, head_title="Login")
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -46,7 +46,7 @@ def register():
         db.session.commit()
         flash('Congratulations, you are now a registered user!')
         return redirect(url_for('login'))
-    return render_template('register.html', title='Register', form=form)
+    return render_template('register.html', title='Register', form=form,head_title="Register")
 
 
 @app.route('/logout')
@@ -73,7 +73,8 @@ def upload_image():
             caption =ImageCaptioning.predict_user_images(filename)
             print(caption)
             caption = ' '.join(caption.split()[1:-1])
-            return render_template('result.html',message=caption)
+            #return render_template('result.html',message=caption)
+            return jsonify(caption=caption)
         else:
             flash('Invalid file type. Allowed file types are: png, jpg, jpeg, gif')
             return redirect(url_parse('index'))
@@ -98,11 +99,10 @@ def upload_video():
                 caption = predict_video()
                 print(caption)
                 os.remove(file_path)
-                return render_template('result.html',message=caption)
+                #return render_template('result.html',message=caption)
+                return jsonify(caption=caption)
             else:
                 flash('Invalid file type. Allowed file types are: png, jpg, jpeg, gif')
                 return redirect(url_parse('uploadvideo'))
         form = UploadVideoForm()
-        return render_template('video.html',title='Video',form=form)
-    
-
+        return render_template('video.html',title='Video',form=form,head_title="Video Captions")
